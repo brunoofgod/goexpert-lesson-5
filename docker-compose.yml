@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - WEATHER_API_KEY=d365dc42c04f4ad9805201403250403
+      - SERVER_B_HOST=http://server-b:8085
+      - HOSTNAME=localhost:8080
+      - PORT=8080
+    command: ["/root/server"]
+
+  server-b:
+    build: .
+    ports:
+      - "8085:8085"
+    environment:
+      - HOSTNAME=localhost:8085
+      - PORT=8085
+    command: ["/root/server-b"]

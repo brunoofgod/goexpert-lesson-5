@@ -1,0 +1,41 @@
+basePath: /
+info:
+  contact: {}
+  description: API que recebe um CEP e retorna o nome da cidade equivalente ao CEP.
+  title: Cidade API
+  version: "1.0"
+paths:
+  /get-city-by-zip:
+    get:
+      consumes:
+      - application/json
+      description: Retorna o nome da cidade pelo CEP
+      parameters:
+      - description: CEP para consulta
+        in: query
+        name: zipcode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtém o nome da cidade através do CEP
+      tags:
+      - City
+swagger: "2.0"

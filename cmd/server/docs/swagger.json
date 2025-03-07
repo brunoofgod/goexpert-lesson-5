@@ -1,0 +1,88 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API que recebe um CEP e retorna a temperatura atual.",
+        "title": "Clima API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/weather": {
+            "post": {
+                "description": "Retorna a temperatura em Celsius, Fahrenheit e Kelvin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clima"
+                ],
+                "summary": "Obtém a temperatura de uma cidade a partir do CEP",
+                "parameters": [
+                    {
+                        "description": "CEP para consulta",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.WeatherRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.WeatherResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.WeatherRequest": {
+            "type": "object",
+            "properties": {
+                "cep": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.WeatherResponse": {
+            "type": "object",
+            "properties": {
+                "temp_C": {
+                    "type": "number"
+                },
+                "temp_F": {
+                    "type": "number"
+                },
+                "temp_K": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

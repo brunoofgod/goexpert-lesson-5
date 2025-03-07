@@ -1,0 +1,62 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API que recebe um CEP e retorna o nome da cidade equivalente ao CEP.",
+        "title": "Cidade API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/get-city-by-zip": {
+            "get": {
+                "description": "Retorna o nome da cidade pelo CEP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "City"
+                ],
+                "summary": "Obtém o nome da cidade através do CEP",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "CEP para consulta",
+                        "name": "zipcode",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
