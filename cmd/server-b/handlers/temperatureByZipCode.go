@@ -32,6 +32,11 @@ func GetTemperatureByZipCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(zipCode) != 8 {
+		http.Error(w, `{"message": "invalid zipcode"}`, http.StatusUnprocessableEntity)
+		return
+	}
+
 	cityName, err := services.GetCityByZipOnViaCEP(ctx, zipCode)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)

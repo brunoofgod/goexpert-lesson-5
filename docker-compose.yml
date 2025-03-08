@@ -19,7 +19,7 @@ services:
     ports:
       - "8085:8085"
     environment:
-      - WEATHER_API_KEY=d365dc42c04f4ad9805201403250403
+      - WEATHER_API_KEY=[SUA-API-KEY]
       - HOSTNAME=localhost:8085
       - PORT=8085
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans

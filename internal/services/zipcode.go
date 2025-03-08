@@ -39,7 +39,7 @@ func GetCityByZipOnViaCEP(ctx context.Context, cep string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("CEP não encontrado")
+		return "", fmt.Errorf("can not find zipcode")
 	}
 
 	var data ViaCEPResponse
@@ -48,7 +48,7 @@ func GetCityByZipOnViaCEP(ctx context.Context, cep string) (string, error) {
 	}
 
 	if data.Localidade == "" {
-		return "", fmt.Errorf("CEP inválido")
+		return "", fmt.Errorf("invalid zipcode")
 	}
 
 	return data.Localidade, nil
