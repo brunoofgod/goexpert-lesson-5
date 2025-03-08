@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WeatherResponse"
+                            "$ref": "#/definitions/services.WeatherResponse"
                         }
                     },
                     "404": {
@@ -77,7 +77,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.WeatherResponse": {
+        "services.WeatherResponse": {
             "type": "object",
             "properties": {
                 "temp_C": {
@@ -96,12 +96,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "",
 	Host:             "",
-	BasePath:         "/",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Clima API",
-	Description:      "API que recebe um CEP e retorna a temperatura atual.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

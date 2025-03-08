@@ -16,10 +16,14 @@ FROM debian:bookworm
 
 WORKDIR /root/
 
-# Instala pacotes 
-RUN apt-get update 
+# Instala pacotes
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 
 COPY --from=builder /app/server .
 COPY --from=builder /app/server-b .
+
+# Expõe as portas dos serviços
+EXPOSE 8080
+EXPOSE 8085
 
 CMD ["/root/server"]

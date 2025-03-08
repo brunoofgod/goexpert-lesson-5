@@ -50,7 +50,7 @@ func TestGetWeatherByCity(t *testing.T) {
 		t.Fatalf("Erro inesperado: %v", err)
 	}
 
-	if temp != 25.0 {
+	if temp.TempC != 25.0 {
 		t.Errorf("Esperava 25.0°C, mas recebeu %f", temp)
 	}
 }

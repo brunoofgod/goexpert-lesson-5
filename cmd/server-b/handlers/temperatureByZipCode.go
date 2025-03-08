@@ -7,18 +7,18 @@ import (
 	"github.com/brunoofgod/goexpert-lesson-5/internal/services"
 )
 
-// GetCityByZip processa a requisição do usuário
-// @Summary Obtém o nome da cidade através do CEP
-// @Description Retorna o nome da cidade pelo CEP
-// @Tags City
+// GetTemperatureByZipCode processa a requisição do usuário
+// @Summary Obtém as temperaturas de uma cidade a partir do CEP
+// @Description Retorna os graus de temperatura em Celsius, Fahrenheit e Kelvin
+// @Tags Temperature
 // @Accept json
 // @Produce json
 // @Param zipcode query string true "CEP para consulta"
-// @Success 200 {object} string
+// @Success 200 {object} services.WeatherResponse
 // @Failure 422 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /get-city-by-zip [get]
-func GetCityByZip(w http.ResponseWriter, r *http.Request) {
+// @Router /get-temperature-by-zipcode [get]
+func GetTemperatureByZipCode(w http.ResponseWriter, r *http.Request) {
 
 	zipCode := r.URL.Query().Get("zipcode")
 
@@ -26,8 +26,13 @@ func GetCityByZip(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ZipCode is required", http.StatusBadRequest)
 		return
 	}
-
 	cityName, err := services.GetCityByZipOnViaCEP(zipCode)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	response, err := services.GetWeatherByCity(&http.Client{}, &cityName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,5 +40,5 @@ func GetCityByZip(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(cityName)
+	json.NewEncoder(w).Encode(response)
 }

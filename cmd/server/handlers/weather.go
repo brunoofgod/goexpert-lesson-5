@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,16 +9,12 @@ import (
 	"os"
 
 	"github.com/brunoofgod/goexpert-lesson-5/internal/services"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
 )
 
 type WeatherRequest struct {
 	CEP string `json:"cep"`
-}
-
-type WeatherResponse struct {
-	TempC float64 `json:"temp_C"`
-	TempF float64 `json:"temp_F"`
-	TempK float64 `json:"temp_K"`
 }
 
 // GetWeather processa a requisição do usuário
@@ -27,13 +24,19 @@ type WeatherResponse struct {
 // @Accept json
 // @Produce json
 // @Param request body WeatherRequest true "CEP para consulta"
-// @Success 200 {object} WeatherResponse
+// @Success 200 {object} services.WeatherResponse
 // @Failure 422 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /weather [post]
 func GetWeather(w http.ResponseWriter, r *http.Request) {
-	var req WeatherRequest
+	ctx := r.Context()
+	tracer := otel.Tracer("server")
 
+	// Criando um span para a requisição do usuário
+	ctx, span := tracer.Start(ctx, "GetWeather")
+	defer span.End()
+
+	var req WeatherRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
@@ -44,49 +47,48 @@ func GetWeather(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	city, err := getCityByZipCode(req, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		return
-	}
-	tempC, err := services.GetWeatherByCity(http.DefaultClient, city)
-	if err != nil {
-		http.Error(w, `{"message": "error fetching weather"}`, http.StatusInternalServerError)
+	bodyBytes, shouldReturn := getTemperatures(ctx, req, w)
+	if shouldReturn {
 		return
 	}
 
-	response := WeatherResponse{
-		TempC: tempC,
-		TempF: tempC*1.8 + 32,
-		TempK: tempC + 273,
+	var response services.WeatherResponse
+	if err := json.Unmarshal(bodyBytes, &response); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-func getCityByZipCode(req WeatherRequest, w http.ResponseWriter) (*string, error) {
-
-	url := fmt.Sprintf("%s/get-city-by-zip?zipcode=%s", os.Getenv("SERVER_B_HOST"), req.CEP)
-	resp, err := http.DefaultClient.Get(url)
+func getTemperatures(ctx context.Context, req WeatherRequest, w http.ResponseWriter) ([]byte, bool) {
+	url := fmt.Sprintf("%s/get-temperature-by-zipcode?zipcode=%s", os.Getenv("SERVER_B_HOST"), req.CEP)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return nil, err
+		http.Error(w, `{"message": "invalid zipcode"}`, http.StatusUnprocessableEntity)
+	}
+
+	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+	resp, err := client.Do(httpReq)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil, true
 	}
 
 	defer resp.Body.Close()
 
 	bodyBytes, err := io.ReadAll(resp.Body)
-	bodyString := string(bodyBytes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil, true
+	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`{"message": "%s"}`, bodyString)
+		http.Error(w, string(bodyBytes), resp.StatusCode)
+		return nil, true
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &bodyString, nil
+	return bodyBytes, false
 }

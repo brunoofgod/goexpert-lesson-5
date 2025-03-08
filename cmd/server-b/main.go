@@ -28,7 +28,7 @@ func main() {
 	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+os.Getenv("HOSTNAME")+"/swagger/doc.json")))
 
 	// Rotas da aplicacao
-	r.Get("/get-city-by-zip", handlers.GetCityByZip)
+	r.Get("/get-temperature-by-zipcode", handlers.GetTemperatureByZipCode)
 
 	port := os.Getenv("PORT")
 

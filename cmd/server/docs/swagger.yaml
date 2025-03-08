@@ -1,11 +1,10 @@
-basePath: /
 definitions:
   handlers.WeatherRequest:
     properties:
       cep:
         type: string
     type: object
-  handlers.WeatherResponse:
+  services.WeatherResponse:
     properties:
       temp_C:
         type: number
@@ -16,9 +15,6 @@ definitions:
     type: object
 info:
   contact: {}
-  description: API que recebe um CEP e retorna a temperatura atual.
-  title: Clima API
-  version: "1.0"
 paths:
   /weather:
     post:
@@ -38,7 +34,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.WeatherResponse'
+            $ref: '#/definitions/services.WeatherResponse'
         "404":
           description: Not Found
           schema:

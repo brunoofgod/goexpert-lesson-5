@@ -1,12 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API que recebe um CEP e retorna a temperatura atual.",
-        "title": "Clima API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "basePath": "/",
     "paths": {
         "/weather": {
             "post": {
@@ -36,7 +32,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.WeatherResponse"
+                            "$ref": "#/definitions/services.WeatherResponse"
                         }
                     },
                     "404": {
@@ -70,7 +66,7 @@
                 }
             }
         },
-        "handlers.WeatherResponse": {
+        "services.WeatherResponse": {
             "type": "object",
             "properties": {
                 "temp_C": {

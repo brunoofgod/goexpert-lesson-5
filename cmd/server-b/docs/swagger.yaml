@@ -1,15 +1,25 @@
 basePath: /
+definitions:
+  services.WeatherResponse:
+    properties:
+      temp_C:
+        type: number
+      temp_F:
+        type: number
+      temp_K:
+        type: number
+    type: object
 info:
   contact: {}
   description: API que recebe um CEP e retorna o nome da cidade equivalente ao CEP.
   title: Cidade API
   version: "1.0"
 paths:
-  /get-city-by-zip:
+  /get-temperature-by-zipcode:
     get:
       consumes:
       - application/json
-      description: Retorna o nome da cidade pelo CEP
+      description: Retorna os graus de temperatura em Celsius, Fahrenheit e Kelvin
       parameters:
       - description: CEP para consulta
         in: query
@@ -22,7 +32,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/services.WeatherResponse'
         "404":
           description: Not Found
           schema:
@@ -35,7 +45,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Obtém o nome da cidade através do CEP
+      summary: Obtém as temperaturas de uma cidade a partir do CEP
       tags:
-      - City
+      - Temperature
 swagger: "2.0"

@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/get-city-by-zip": {
+        "/get-temperature-by-zipcode": {
             "get": {
-                "description": "Retorna o nome da cidade pelo CEP",
+                "description": "Retorna os graus de temperatura em Celsius, Fahrenheit e Kelvin",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,9 +25,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "City"
+                    "Temperature"
                 ],
-                "summary": "Obtém o nome da cidade através do CEP",
+                "summary": "Obtém as temperaturas de uma cidade a partir do CEP",
                 "parameters": [
                     {
                         "type": "string",
@@ -41,7 +41,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/services.WeatherResponse"
                         }
                     },
                     "404": {
@@ -62,6 +62,22 @@ const docTemplate = `{
                             }
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "services.WeatherResponse": {
+            "type": "object",
+            "properties": {
+                "temp_C": {
+                    "type": "number"
+                },
+                "temp_F": {
+                    "type": "number"
+                },
+                "temp_K": {
+                    "type": "number"
                 }
             }
         }
