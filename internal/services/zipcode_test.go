@@ -1,9 +1,12 @@
 package services
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestGetCityByZipSuccess(t *testing.T) {
-	city, err := GetCityByZipOnViaCEP("01001000")
+	city, err := GetCityByZipOnViaCEP(context.Background(), "01001000")
 	if err != nil {
 		t.Fatalf("Erro inesperado: %v", err)
 	}
@@ -14,21 +17,21 @@ func TestGetCityByZipSuccess(t *testing.T) {
 }
 
 func TestGetCityByZipNotFound(t *testing.T) {
-	city, err := GetCityByZipOnViaCEP("00000000")
+	city, err := GetCityByZipOnViaCEP(context.Background(), "00000000")
 	if err == nil {
 		t.Errorf("Esperava erro, mas recebeu %s", city)
 	}
 }
 
 func TestGetCityByZipInvalidCEP(t *testing.T) {
-	city, err := GetCityByZipOnViaCEP("123")
+	city, err := GetCityByZipOnViaCEP(context.Background(), "123")
 	if err == nil {
 		t.Errorf("Esperava erro, mas recebeu %s", city)
 	}
 }
 
 func TestGetCityByZipInvalidCEPFormat(t *testing.T) {
-	city, err := GetCityByZipOnViaCEP("1234567")
+	city, err := GetCityByZipOnViaCEP(context.Background(), "1234567")
 	if err == nil {
 		t.Errorf("Esperava erro, mas recebeu %s", city)
 	}

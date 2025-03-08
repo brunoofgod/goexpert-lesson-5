@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   services.WeatherResponse:
     properties:
@@ -11,9 +10,6 @@ definitions:
     type: object
 info:
   contact: {}
-  description: API que recebe um CEP e retorna o nome da cidade equivalente ao CEP.
-  title: Cidade API
-  version: "1.0"
 paths:
   /get-temperature-by-zipcode:
     get:

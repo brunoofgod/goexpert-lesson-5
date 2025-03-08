@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/brunoofgod/goexpert-lesson-5/internal/services"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
 )
 
 // GetTemperatureByZipCode processa a requisição do usuário
@@ -19,20 +21,28 @@ import (
 // @Failure 404 {object} map[string]string
 // @Router /get-temperature-by-zipcode [get]
 func GetTemperatureByZipCode(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	tracer := otel.Tracer("server-b")
+	ctx, span := tracer.Start(ctx, "GetTemperatureByZipCode-handler")
+	defer span.End()
 
 	zipCode := r.URL.Query().Get("zipcode")
-
 	if zipCode == "" {
 		http.Error(w, "ZipCode is required", http.StatusBadRequest)
 		return
 	}
-	cityName, err := services.GetCityByZipOnViaCEP(zipCode)
+
+	cityName, err := services.GetCityByZipOnViaCEP(ctx, zipCode)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
-	response, err := services.GetWeatherByCity(&http.Client{}, &cityName)
+	client := &http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+
+	response, err := services.GetWeatherByCity(ctx, client, &cityName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

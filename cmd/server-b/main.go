@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -10,13 +11,46 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/zipkin"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-// @title Cidade API
-// @version 1.0
-// @description API que recebe um CEP e retorna o nome da cidade equivalente ao CEP.
-// @BasePath /
+func initTracer() func() {
+	zipkinURL := os.Getenv("ZIPKIN_URL")
+	if zipkinURL == "" {
+		zipkinURL = "http://zipkin:9411/api/v2/spans" // URL do Zipkin no docker-compose
+	}
+
+	exporter, err := zipkin.New(zipkinURL)
+	if err != nil {
+		log.Fatalf("Erro ao criar exportador Zipkin: %v", err)
+	}
+
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(exporter),
+		trace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("server-b"),
+		)),
+	)
+
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	return func() {
+		_ = tp.Shutdown(context.Background())
+	}
+}
+
 func main() {
+	cleanup := initTracer()
+	defer cleanup()
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
@@ -27,8 +61,8 @@ func main() {
 
 	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+os.Getenv("HOSTNAME")+"/swagger/doc.json")))
 
-	// Rotas da aplicacao
-	r.Get("/get-temperature-by-zipcode", handlers.GetTemperatureByZipCode)
+	// Rotas da aplicação (agora instrumentadas com OpenTelemetry)
+	r.Get("/get-temperature-by-zipcode", otelhttp.NewHandler(http.HandlerFunc(handlers.GetTemperatureByZipCode), "GetTemperatureByZipCode").ServeHTTP)
 
 	port := os.Getenv("PORT")
 

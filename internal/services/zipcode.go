@@ -1,9 +1,13 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
 )
 
 type ViaCEPResponse struct {
@@ -11,9 +15,24 @@ type ViaCEPResponse struct {
 }
 
 // GetCityByZip consulta o ViaCEP para obter a cidade do CEP
-func GetCityByZipOnViaCEP(cep string) (string, error) {
+func GetCityByZipOnViaCEP(ctx context.Context, cep string) (string, error) {
+	tracer := otel.Tracer("server-b")
+	ctx, span := tracer.Start(ctx, "GetCityByZipOnViaCEP")
+	defer span.End()
+
 	url := fmt.Sprintf("https://viacep.com.br/ws/%s/json/", cep)
-	resp, err := http.Get(url)
+
+	// Criando um client HTTP com OpenTelemetry
+	client := &http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}

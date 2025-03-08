@@ -1,12 +1,15 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
+
+	"go.opentelemetry.io/otel"
 )
 
 type WeatherAPIResponse struct {
@@ -22,13 +25,23 @@ type WeatherResponse struct {
 }
 
 // GetWeatherByCity consulta a WeatherAPI para obter a temperatura atual
-func GetWeatherByCity(client *http.Client, city *string) (*WeatherResponse, error) {
+func GetWeatherByCity(ctx context.Context, client *http.Client, city *string) (*WeatherResponse, error) {
+	tracer := otel.Tracer("server-b")
+	ctx, span := tracer.Start(ctx, "GetWeatherByCity")
+	defer span.End()
+
 	apiKey := os.Getenv("WEATHER_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("API Key não configurada")
 	}
 	url := fmt.Sprintf("https://api.weatherapi.com/v1/current.json?q=%s&key=%s", url.QueryEscape(*city), apiKey)
-	resp, err := client.Get(url)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -45,7 +46,7 @@ func TestGetWeatherByCity(t *testing.T) {
 	}
 
 	city := "São Paulo"
-	temp, err := GetWeatherByCity(mockClient, &city)
+	temp, err := GetWeatherByCity(context.Background(), mockClient, &city)
 	if err != nil {
 		t.Fatalf("Erro inesperado: %v", err)
 	}

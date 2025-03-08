@@ -1,12 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API que recebe um CEP e retorna o nome da cidade equivalente ao CEP.",
-        "title": "Cidade API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "basePath": "/",
     "paths": {
         "/get-temperature-by-zipcode": {
             "get": {

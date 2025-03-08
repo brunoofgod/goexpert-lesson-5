@@ -33,7 +33,7 @@ func GetWeather(w http.ResponseWriter, r *http.Request) {
 	tracer := otel.Tracer("server")
 
 	// Criando um span para a requisição do usuário
-	ctx, span := tracer.Start(ctx, "GetWeather")
+	ctx, span := tracer.Start(ctx, "GetWeather-handler")
 	defer span.End()
 
 	var req WeatherRequest
